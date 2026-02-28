@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبار إلكتروني</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        direction: rtl;
+        font-weight: 900;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border: 2px solid #007bff;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0, 123, 255, 0.2);
+        text-align: center;
+        transition: all 0.3s ease-in-out;
+      }
+
+      #login-container label {
+        display: block;
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 8px;
+        text-align: right;
+      }
+
+      #login-container input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+      }
+
+      #login-container button {
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        padding: 12px 0;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #login-container button:hover {
+        background-color: #0056b3;
+      }
+
+      #result {
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      #timer {
+        font-size: 20px;
+        color: red;
+        font-weight: bold;
+      }
+
+      h2 {
+        font-size: 22px;
+        font-weight: 900;
+        color: #000000;
+      }
+
+      label {
+        font-size: 18px;
+        font-weight: 900;
+        color: #333333;
+      }
+
+      #next-button {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+        padding: 10px 20px;
+        font-weight: 900;
+      }
+
+      .correct-answer {
+        color: green;
+        font-weight: 900;
+      }
+
+      .wrong-answer {
+        color: red;
+        font-weight: 900;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      ul li {
+        margin-bottom: 15px;
+        background-color: #f0f4f8;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 900;
+        color: #000;
+        font-size: 18px;
+      }
+
+      #result h2,
+      #result h3,
+      #result p {
+        font-weight: 900;
+        color: #000;
+        font-size: 18px;
+        text-align: right;
+      }
+
+      #retry-button {
+        padding: 10px 20px;
+        font-weight: bold;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>التدريب علي اختبارات الجهاز المركزى</h2>
+
+    <div id="login-container">
+      <label for="password">🔒 أدخل كلمة المرور:</label>
+      <input id="password" type="password" placeholder="مثال: 12345678" />
+      <label for="duration">⏳ حدد مدة الاختبار (بالدقائق):</label>
+      <input id="duration" type="number" value="5" min="1" />
+      <button onclick="checkPassword()">🚀 دخول</button>
+    </div>
+
+    <div class="hidden" id="quiz">
+      <div id="timer">5:00</div>
+      <div id="question-info">السؤال 1 من 20</div>
+      <form id="quizForm">
+        <div id="question-container"></div>
+        <button id="next-button" onclick="nextQuestion(event)" type="button">
+          التالي
+        </button>
+      </form>
+    </div>
+
+    <div class="hidden" id="result"></div>
+
+    <script>
+      const questions = [
+        {
+          question:
+            "تُسمّى الأعمدة في جدول Microsoft Access أيضًا بـ _______ ؟",
+          options: ["الصفوف", "السجلات", "الحقول", "الأعمدة"],
+          answer: "الحقول",
+        },
+        {
+          question:
+            "تُسمّى 'الصفوف' في جدول Microsoft Access أيضًا بـ _______ ؟",
+          options: ["الحقول", "السجلات", "المفاتيح", "الاستعلامات"],
+          answer: "السجلات",
+        },
+        {
+          question: "تتألف السجلات في قاعدة البيانات من:",
+          options: ["نماذج", "جداول", "تقارير", "حقول"],
+          answer: "حقول",
+        },
+        {
+          question: "عند تسجيل المعلومات في سجل، فإننا نسجلها في:",
+          options: ["صف", "عمود", "جدول", "خلية"],
+          answer: "صف",
+        },
+        {
+          question: "أيٌّ مما يلي يحتوي على عنصر واحد فقط في قاعدة البيانات؟",
+          options: ["الجدول", "السجل", "قاعدة البيانات", "الحقل"],
+          answer: "الحقل",
+        },
+        {
+          question: "أي مما يلي يُستخدم لعرض البيانات بشكل منظم؟",
+          options: ["النصوص", "الجدول", "الرسم البياني", "الصوت"],
+          answer: "الجدول",
+        },
+        {
+          question: "أيٌّ مما يلي يُعد طريقة لإنشاء جدول جديد في MS Access؟",
+          options: [
+            "استخدام طريقة عرض التصميم",
+            "استخدام المعالج",
+            "إدخال البيانات مباشرة",
+            "جميع ما سبق",
+          ],
+          answer: "جميع ما سبق",
+        },
+        {
+          question: "كيف يمكن إنشاء استعلام في Microsoft Access؟",
+          options: [
+            "سحب وإفلات الحقول",
+            "كتابة أوامر SQL",
+            "استخدام معالج الاستعلام",
+            "جميع ما سبق",
+          ],
+          answer: "جميع ما سبق",
+        },
+        {
+          question: "Microsoft Access هو نوع أي من التطبيقات؟",
+          options: [
+            "نظام إدارة قواعد بيانات علائقية (RDBMS)",
+            "نظام إدارة قواعد بيانات كائنية",
+            "نظام إدارة قواعد بيانات علائقية كائنية",
+            "نموذج قواعد بيانات شبكي",
+          ],
+          answer: "نظام إدارة قواعد بيانات علائقية (RDBMS)",
+        },
+        {
+          question: "ما هو الحد الأقصى لطول حقل النص؟ (MS Access)",
+          options: ["120", "255", "265", "75"],
+          answer: "255",
+        },
+        {
+          question:
+            "ما هو الحد الأقصى لعدد الأحرف التي يمكن كتابتها عند تسمية الحقل؟",
+          options: ["60", "64", "68", "أي عدد من الأحرف"],
+          answer: "64",
+        },
+        {
+          question: "لمنع التكرار في الحقل:",
+          options: ["اختياري", "نصي", "المفتاح الأساسي Primary Key", "التاريخ"],
+          answer: "المفتاح الأساسي Primary Key",
+        },
+        {
+          question: "عند ربط جدولين يجب وجود:",
+          options: ["حقل مشترك", "نفس المفتاح", "نفس الأسماء", "نفس الأعمدة"],
+          answer: "حقل مشترك",
+        },
+        {
+          question: "كيف يمكن إنشاء قائمة منسدلة في قاعدة البيانات؟",
+          options: [
+            "من كائن OLE",
+            "من معالج البحث",
+            "من شريط التنسيق",
+            "من أداة الصور",
+          ],
+          answer: "من معالج البحث",
+        },
+        {
+          question: "وظيفة معالج البحث Lookup Wizard؟",
+          options: [
+            "حذف السجلات",
+            "نسخ الجدول",
+            "إنشاء قائمة منسدلة",
+            "تنسيق النص",
+          ],
+          answer: "إنشاء قائمة منسدلة",
+        },
+        {
+          question: "ما هي قائمة التحرير والسرد (COMBO BOX) في MS ACCESS؟",
+          options: [
+            "نموذج يُستخدم لإدخال البيانات",
+            "نوع من مربعات النص يُستخدم لإدخال البيانات",
+            "جدول يُستخدم لتخزين البيانات",
+            "عنصر تحكم يحتوي على قائمة منسدلة من القيم",
+          ],
+          answer: "عنصر تحكم يحتوي على قائمة منسدلة من القيم",
+        },
+        {
+          question:
+            "في برنامج ACCESS، ما هو الاختصار المستخدم لفتح قائمة منسدلة؟",
+          options: [
+            "السهم للأسفل",
+            "F9",
+            "F4 أو ALT + السهم للأسفل",
+            "الانتقال لأسفل الصفحة",
+          ],
+          answer: "F4 أو ALT + السهم للأسفل",
+        },
+        {
+          question: "ما الغرض من عنصر تحكم التحرير والسرد COMBO BOX؟",
+          options: [
+            "توفير طريقة مدمجة لعرض قائمة من الخيارات",
+            "إخفاء القائمة حتى ينقر المستخدم على السهم المنسدل",
+            "السماح بإدخال قيمة غير موجودة في القائمة",
+            "جميع ما سبق",
+          ],
+          answer: "جميع ما سبق",
+        },
+        {
+          question: "كيف يمكنك إنشاء التحرير والسرد COMBO BOX في MS ACCESS؟",
+          options: [
+            "اختيار عنصر تحكم Combo Box من قائمة Controls",
+            "رسم Combo Box واستخدام معالج Combo Box",
+            "إدخال القيم للقائمة المنسدلة والنقر على 'إنهاء'",
+            "جميع ما سبق",
+          ],
+          answer: "جميع ما سبق",
+        },
+        {
+          question: "ما هي ميزة استخدام التحرير والسرد COMBO BOX؟",
+          options: [
+            "يوفر مساحة على النموذج",
+            "يسهل اختيار القيم دون كتابة",
+            "يسمح بإدخال قيم غير موجودة",
+            "جميع ما سبق",
+          ],
+          answer: "جميع ما سبق",
+        },
+      ];
+      let currentQuestion = 0;
+      let score = 0;
+      let timer;
+      let timeLeft;
+      let userAnswers = [];
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function shuffleQuestions() {
+        shuffle(questions);
+        questions.forEach((q) => shuffle(q.options));
+      }
+
+      function checkPassword() {
+        const passwordInput = document.getElementById("password").value;
+        const durationInput =
+          parseInt(document.getElementById("duration").value) || 10;
+        timeLeft = durationInput * 60;
+
+        if (passwordInput === "1111") {
+          shuffleQuestions();
+          document.getElementById("login-container").classList.add("hidden");
+          document.getElementById("quiz").classList.remove("hidden");
+          document.getElementById("result").classList.add("hidden");
+          currentQuestion = 0;
+          score = 0;
+          userAnswers = [];
+          loadQuestion();
+          startTimer();
+        } else {
+          alert("🚫 المحاولة غير صحيحة! تأكد من كتابة كلمة السر بشكل دقيق.");
+        }
+      }
+
+      function loadQuestion() {
+        const questionContainer = document.getElementById("question-container");
+        questionContainer.innerHTML = `
+      <h2>${questions[currentQuestion].question}</h2>
+      ${questions[currentQuestion].options
+        .map(
+          (option) => `
+        <label>
+          <input type="radio" name="option" value="${option}" />
+          ${
+            option === questions[currentQuestion].answer
+              ? `<span class="correct">${option}</span>`
+              : option
+          }
+        </label><br>
+      `,
+        )
+        .join("")}
+    `;
+        document.getElementById("question-info").textContent = `السؤال ${
+          currentQuestion + 1
+        } من ${questions.length}`;
+      }
+
+      function nextQuestion(event) {
+        event.preventDefault();
+        const selected = document.querySelector('input[name="option"]:checked');
+        if (!selected) return alert("اختر إجابة.");
+        userAnswers[currentQuestion] = selected.value;
+        if (selected.value === questions[currentQuestion].answer) score++;
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          loadQuestion();
+        } else {
+          clearInterval(timer);
+          showResults();
+        }
+      }
+
+      function showResults(timeUp = false) {
+        document.getElementById("quiz").classList.add("hidden");
+        const resultDiv = document.getElementById("result");
+        resultDiv.classList.remove("hidden");
+
+        const percent = ((score / questions.length) * 100).toFixed(1);
+
+        let feedback = "";
+        if (percent == 100) {
+          feedback = "أنت بطل! برافو عليك 👏";
+        } else if (percent >= 80) {
+          feedback = "ممتاز! واضح إنك مذاكر كويس 💪";
+        } else if (percent >= 60) {
+          feedback = "كويس، بس محتاج تراجع شوية 🙂";
+        } else if (percent >= 40) {
+          feedback = "راجع الدروس تاني وحاول تركز أكتر 📚";
+        } else {
+          feedback = "ابدأ من الأول وراجع كويس، شد حيلك! 💡";
+        }
+
+        let warningMsg = "";
+        if (timeUp && currentQuestion < questions.length) {
+          warningMsg = `
+        <p style="color: red;">⏰ انتهى الوقت قبل إكمال جميع الأسئلة.</p>
+        <p>في المرة الجاية حاول تحل الأسئلة بشكل أسرع علشان تلحق تكمل 💡</p>
+      `;
+        }
+
+        let review = "<h3>مراجعة الإجابات:</h3><ul>";
+        questions.forEach((q, i) => {
+          const ua = userAnswers[i] || "لم يُجب";
+          const correct = q.answer;
+          const isCorrect = ua === correct;
+          review += `
+        <li>
+          <strong>السؤال ${i + 1}:</strong> ${q.question}<br>
+          إجابتك: <span class="${
+            isCorrect ? "correct-answer" : "wrong-answer"
+          }">${ua}</span><br>
+          الإجابة الصحيحة: <span class="correct-answer">${correct}</span><br>
+          <strong>التفسير:</strong> ${q.explanation || "لا يوجد تفسير."}
+        </li>
+      `;
+        });
+        review += "</ul>";
+
+        resultDiv.innerHTML = `
+      ${warningMsg}
+      <h2>نتيجة الاختبار</h2>
+      <p>${score} من ${questions.length} | النسبة: ${percent}%</p>
+      <p>${feedback}</p>
+      ${review}
+      <button id="retry-button" onclick="location.reload()">إعادة المحاولة</button>
+    `;
+      }
+
+      function startTimer() {
+        timer = setInterval(() => {
+          timeLeft--;
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          document.getElementById("timer").textContent = `${minutes}:${
+            seconds < 10 ? "0" : ""
+          }${seconds}`;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("انتهى الوقت!");
+            showResults(true);
+          }
+        }, 1000);
+      }
+
+      document
+        .getElementById("quizForm")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            nextQuestion(event);
+          }
+        });
+    </script>
+  </body>
+</html>
